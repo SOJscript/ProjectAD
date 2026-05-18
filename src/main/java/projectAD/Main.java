@@ -6,7 +6,7 @@ public class Main {
     }
 
     public static void menuDB(){
-
+        int choice = 0;
     }
 }
 
