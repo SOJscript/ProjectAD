@@ -2,7 +2,6 @@ package projectAD;
 
 import java.util.List;
 import java.util.Scanner;
-import java.util.Scanner;
 import projectAD.model.Department;
 import projectAD.model.Employee;
 
