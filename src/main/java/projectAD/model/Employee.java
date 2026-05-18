@@ -1,4 +1,4 @@
-package projectAD;
+package projectAD.model;
 
 public class Employee {
     private int empno;

@@ -2,14 +2,16 @@ package projectAD;
 
 import java.util.Scanner;
 
+// Para cambiar de componente, modifica solo esta línea:
+import projectAD.fichero.Componente;
+// import projectAD.postgres.Componente;
+// import projectAD.orm.Componente;
+// import projectAD.db4o.Componente;
+// import projectAD.mongo.Componente;
+
 public class Main {
 
-    //Elegimos cual usar
-    private static IDAO datos = new ComponenteFichero();
-    // private static IDAO datos = new ComponentePostgres();
-    // private static IDAO datos = new ComponenteORM();
-    // private static IDAO datos = new ComponenteDb4o();
-    // private static IDAO datos = new ComponenteMongo();
+    private static IDAO datos = new Componente();
 
     static void main(String[] args) {
         menu();
@@ -19,4 +21,3 @@ public class Main {
 
     }
 }
-

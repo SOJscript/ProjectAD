@@ -1,4 +1,4 @@
-package projectAD;
+package projectAD.model;
 
 public class Department {
     private int depno;
