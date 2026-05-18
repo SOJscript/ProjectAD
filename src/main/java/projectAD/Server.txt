@@ -4,3 +4,11 @@ Si da error:
 
 sudo systemctl enable mongod
 sudo systemctl enable postgresql
+
+Mongo--
+user: sergi
+pss: 1234
+
+Postgres--
+user:postgres
+pss:1234
