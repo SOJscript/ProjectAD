@@ -1,8 +1,12 @@
-package projectAD;
+package projectAD.mongo;
 
 import java.util.List;
 
-public class ComponentePostgres implements IDAO {
+import projectAD.IDAO;
+import projectAD.model.Department;
+import projectAD.model.Employee;
+
+public class Componente implements IDAO {
     @Override
     public List<Employee> findAllEmployees() {
         return List.of();
@@ -58,4 +62,3 @@ public class ComponentePostgres implements IDAO {
         return List.of();
     }
 }
-

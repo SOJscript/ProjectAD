@@ -1,8 +1,12 @@
-package projectAD;
+package projectAD.orm;
 
 import java.util.List;
 
-public class ComponenteORM implements IDAO {
+import projectAD.IDAO;
+import projectAD.model.Department;
+import projectAD.model.Employee;
+
+public class Componente implements IDAO {
     @Override
     public List<Employee> findAllEmployees() {
         return List.of();

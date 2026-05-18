@@ -2,6 +2,9 @@ package projectAD;
 
 import java.util.List;
 
+import projectAD.model.Department;
+import projectAD.model.Employee;
+
 public interface IDAO {
     public List<Employee> findAllEmployees();
     public Employee findEmployeeById(Object id);
