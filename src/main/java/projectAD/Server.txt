@@ -1,0 +1,6 @@
+Iniciamos server y en principio tiene que conectarse directamente Mongo y Postgres
+
+Si da error:
+
+sudo systemctl enable mongod
+sudo systemctl enable postgresql
