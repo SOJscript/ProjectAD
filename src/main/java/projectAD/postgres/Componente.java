@@ -33,6 +33,13 @@ public class Componente implements IDAO {
                 empleado.setEmpno(resultadoQuery.getInt("empno"));
                 empleado.setNombre(resultadoQuery.getString("nombre"));
                 empleado.setPuesto(resultadoQuery.getString("puesto"));
+
+                int depno = resultadoQuery.getInt("depno");
+                if (!resultadoQuery.wasNull()) {
+                    Department dep = findDepartmentById(depno);
+                    empleado.setDepartamento(dep);
+                }
+
                 lista.add(empleado);
             }
         } catch (SQLException e) {
@@ -95,7 +102,6 @@ public class Componente implements IDAO {
     public boolean updateEmployee(Object id) {
         Scanner sc = new Scanner(System.in);
 
-        // Primero comprobamos que el empleado existe
         Employee existente = findEmployeeById(id);
         if (existente == null) {
             System.out.println("No existe ningún empleado con ese ID.");
