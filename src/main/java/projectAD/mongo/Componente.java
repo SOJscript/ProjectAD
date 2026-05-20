@@ -25,7 +25,7 @@ public class Componente implements IDAO {
 
     // Establecer conexion
     private MongoClient getConnection() {
-        String url = "mongodb://localhost:27017";
+        String url = "mongodb://sergi:1234@localhost:27017/?authSource=admin";
         return MongoClients.create(url);
     }
 
@@ -46,8 +46,13 @@ public class Componente implements IDAO {
 
             Document doc = new Document("empno", employee.getEmpno())
                     .append("nombre", employee.getNombre())
-                    .append("puesto", employee.getPuesto())
-                    .append("depno", employee.getDepartamento().getDepno());
+                    .append("puesto", employee.getPuesto());
+
+            if (employee.getDepartamento() != null) {
+                doc.append("depno", employee.getDepartamento().getDepno());
+            } else {
+                doc.append("depno", null);
+            }
 
             coleccion.insertOne(doc);
             return true;

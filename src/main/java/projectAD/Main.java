@@ -70,7 +70,7 @@ public class Main {
         for (Department d : lista) {
             System.out.println("ID: " + d.getDepno() +
                     " | Nombre: " + d.getNombre() +
-                    " | Sede: " + d.getUbicacion());
+                    " | Ubicacion: " + d.getUbicacion());
         }
     }
 
@@ -81,7 +81,8 @@ public class Main {
         for (Employee e : lista) {
             System.out.println("ID: " + e.getEmpno() +
                     " | Nombre: " + e.getNombre() +
-                    " | Puesto: " + e.getPuesto());
+                    " | Puesto: " + e.getPuesto()+
+                    " | Departamento: "+ e.getDepartamento().getDepno());
         }
     }
 
