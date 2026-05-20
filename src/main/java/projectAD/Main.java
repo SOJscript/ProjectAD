@@ -5,60 +5,87 @@ import java.util.Scanner;
 import projectAD.model.Department;
 import projectAD.model.Employee;
 
-import projectAD.postgres.Componente;
-//import projectAD.db4o.Componente;
-//import projectAD.mongo.Componente;
-//import projectAD.orm.Componente;
-//import projectAD.fichero.Componente;
-
 public class Main {
 
-    private static IDAO datos = new Componente();
+    private static IDAO datos;
+    private static int opcionMenu = -1;
     private static Scanner sc = new Scanner(System.in);
 
     public static void main(String[] args) {
-        menu();
+        menuDB();
+        menuAcciones();
     }
 
-    public static void menu() {
-        int opcion = -1;
-        while (opcion != 0) {
-
-            System.out.println("\n--- GESTIÓN DE EMPLEADOS ---");
-            System.out.println("1. Listar todos los departamentos");
-            System.out.println("2. Listar todos los empleados");
-            System.out.println("3. Buscar empleado por ID");
-            System.out.println("4. Buscar departamento por ID");
-            System.out.println("5. Ver empleados de un departamento");
-            System.out.println("6. Añadir empleado");
-            System.out.println("7. Añadir departamento");
-            System.out.println("8. Modificar empleado");
-            System.out.println("9. Modificar departamento");
-            System.out.println("10. Eliminar empleado");
-            System.out.println("11. Eliminar departamento");
+    public static void menuDB() {
+        while (opcionMenu < 0 || opcionMenu > 5) {
+            System.out.println("\n--- MODELO DE DATOS ---");
+            System.out.println("1. Ficheros");
+            System.out.println("2. Postgres");
+            System.out.println("3. ORM");
+            System.out.println("4. db40");
+            System.out.println("5. Mongo");
             System.out.println("0. Salir");
             System.out.print("Elige una opción: ");
 
             try {
-                opcion = Integer.parseInt(sc.nextLine());
-                switch (opcion) {
-                    case 1 -> listarDepartamentos();
-                    case 2 -> listarEmpleados();
-                    case 3 -> buscarEmpleado();
-                    case 4 -> buscarDepartamento();
-                    case 5 -> listarEmpleadosPorDepartamento();
-                    case 6 -> agregarEmpleado();
-                    case 7 -> agregarDepartamento();
-                    case 8 -> modificarEmpleado();
-                    case 9 -> modificarDepartamento();
-                    case 10 -> borrarEmpleado();
-                    case 11 -> borrarDepartamento();
+                opcionMenu = Integer.parseInt(sc.nextLine());
+                switch (opcionMenu) {
+                    case 1 -> datos = new projectAD.fichero.Componente();
+                    case 2 -> datos = new projectAD.postgres.Componente();
+                    case 3 -> datos = new projectAD.orm.Componente();
+                    case 4 -> datos = new projectAD.db4o.Componente();
+                    case 5 -> datos = new projectAD.mongo.Componente();
                     case 0 -> System.out.println("Exit");
                     default -> System.out.println("Opción no válida.");
                 }
             } catch (Exception e) {
                 System.out.println("Error: Introduce un número válido.");
-                opcion = -1;
+                opcionMenu = -1;
+            }
+        }
+    }
+
+    public static void menuAcciones() {
+        if (opcionMenu != 0) {
+            opcionMenu = -1;
+            while (opcionMenu != 0) {
+
+                System.out.println("\n--- GESTIÓN DE EMPLEADOS ---");
+                System.out.println("1. Listar todos los departamentos");
+                System.out.println("2. Listar todos los empleados");
+                System.out.println("3. Buscar empleado por ID");
+                System.out.println("4. Buscar departamento por ID");
+                System.out.println("5. Ver empleados de un departamento");
+                System.out.println("6. Añadir empleado");
+                System.out.println("7. Añadir departamento");
+                System.out.println("8. Modificar empleado");
+                System.out.println("9. Modificar departamento");
+                System.out.println("10. Eliminar empleado");
+                System.out.println("11. Eliminar departamento");
+                System.out.println("0. Salir");
+                System.out.print("Elige una opción: ");
+
+                try {
+                    opcionMenu = Integer.parseInt(sc.nextLine());
+                    switch (opcionMenu) {
+                        case 1 -> listarDepartamentos();
+                        case 2 -> listarEmpleados();
+                        case 3 -> buscarEmpleado();
+                        case 4 -> buscarDepartamento();
+                        case 5 -> listarEmpleadosPorDepartamento();
+                        case 6 -> agregarEmpleado();
+                        case 7 -> agregarDepartamento();
+                        case 8 -> modificarEmpleado();
+                        case 9 -> modificarDepartamento();
+                        case 10 -> borrarEmpleado();
+                        case 11 -> borrarDepartamento();
+                        case 0 -> System.out.println("Exit");
+                        default -> System.out.println("Opción no válida.");
+                    }
+                } catch (Exception e) {
+                    System.out.println("Error: Introduce un número válido.");
+                    opcionMenu = -1;
+                }
             }
         }
     }
@@ -82,7 +109,7 @@ public class Main {
             System.out.println("ID: " + e.getEmpno() +
                     " | Nombre: " + e.getNombre() +
                     " | Puesto: " + e.getPuesto()+
-                    " | Departamento: "+ e.getDepartamento().getDepno());
+                    " | Departamento: "+ e.getDepartamento().getNombre());
         }
     }
 
