@@ -6,6 +6,10 @@ import projectAD.model.Department;
 import projectAD.model.Employee;
 
 import projectAD.postgres.Componente;
+//import projectAD.db4o.Componente;
+//import projectAD.mongo.Componente;
+//import projectAD.orm.Componente;
+//import projectAD.fichero.Componente;
 
 public class Main {
 
