@@ -5,15 +5,6 @@ import java.util.Scanner;
 import projectAD.model.Department;
 import projectAD.model.Employee;
 
-
-// Para cambiar de componente, modifica solo esta línea:
-// import projectAD.fichero.Componente;
-// import projectAD.postgres.Componente;
-import projectAD.orm.Componente;
-// import projectAD.db4o.Componente;
-// import projectAD.mongo.Componente;
-
-
 public class Main {
 
     private static IDAO datos;

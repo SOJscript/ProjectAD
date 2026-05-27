@@ -16,7 +16,6 @@ public class Componente implements IDAO {
     private EntityManagerFactory emf;
 
     public Componente() {
-
         // "empresaDepartamento" es el nombre definido en persistence.xml
         emf = Persistence.createEntityManagerFactory("empresaDepartamento");
     }

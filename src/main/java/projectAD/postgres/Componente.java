@@ -11,12 +11,23 @@ import projectAD.model.Employee;
 
 public class Componente implements IDAO {
 
-    // Establecer conexion
-    private Connection getConnection() throws SQLException {
-        String url = "jdbc:postgresql://localhost:5432/postgres";
-        String user = "postgres";
-        String password = "1234";
-        return DriverManager.getConnection(url, user, password);
+    private Connection conexion;
+
+    public Componente() {
+        try {
+
+            String url = "jdbc:postgresql://localhost:5432/postgres";
+            String user = "postgres";
+            String password = "1234";
+            this.conexion = DriverManager.getConnection(url, user, password);
+
+        } catch (SQLException e) {
+            System.err.println("Error al conectar con la base de datos: " + e.getMessage());
+        }
+    }
+
+    private Connection getConnection() {
+        return conexion;
     }
 
     @Override
@@ -24,8 +35,7 @@ public class Componente implements IDAO {
         List<Employee> lista = new ArrayList<>();
         String consulta = "SELECT * FROM empleado";
 
-        try (Connection conexion = getConnection();
-             PreparedStatement ps = conexion.prepareStatement(consulta);
+        try (PreparedStatement ps = getConnection().prepareStatement(consulta);
              ResultSet resultadoQuery = ps.executeQuery()) {
 
             while (resultadoQuery.next()) {
@@ -53,8 +63,7 @@ public class Componente implements IDAO {
         Employee empleado = null;
         String consulta = "SELECT * FROM empleado WHERE empno = ?";
 
-        try (Connection conexion = getConnection();
-             PreparedStatement ps = conexion.prepareStatement(consulta)) {
+        try (PreparedStatement ps = getConnection().prepareStatement(consulta)) {
             ps.setInt(1, (Integer) id);
 
             try (ResultSet resultadoQuery = ps.executeQuery()) {
@@ -75,8 +84,7 @@ public class Componente implements IDAO {
     public boolean addEmployee(Employee employee) {
         String consulta = "INSERT INTO empleado (empno, nombre, puesto, depno) VALUES (?, ?, ?, ?)";
 
-        try (Connection conexion = getConnection();
-             PreparedStatement ps = conexion.prepareStatement(consulta)) {
+        try (PreparedStatement ps = getConnection().prepareStatement(consulta)) {
 
             ps.setInt(1, employee.getEmpno());
             ps.setString(2, employee.getNombre());
@@ -121,8 +129,7 @@ public class Componente implements IDAO {
 
         String consulta = "UPDATE empleado SET nombre = ?, puesto = ?, depno = ? WHERE empno = ?";
 
-        try (Connection conexion = getConnection();
-             PreparedStatement ps = conexion.prepareStatement(consulta)) {
+        try (PreparedStatement ps = getConnection().prepareStatement(consulta)) {
 
             ps.setString(1, nombre);
             ps.setString(2, puesto);
@@ -148,8 +155,7 @@ public class Componente implements IDAO {
     public boolean deleteEmployee(Object id) {
         String consulta = "DELETE FROM empleado WHERE empno = ?";
 
-        try (Connection conexion = getConnection();
-             PreparedStatement ps = conexion.prepareStatement(consulta)) {
+        try (PreparedStatement ps = getConnection().prepareStatement(consulta)) {
 
             ps.setInt(1, (Integer) id);
             int filas = ps.executeUpdate();
@@ -166,8 +172,7 @@ public class Componente implements IDAO {
         List<Department> lista = new ArrayList<>();
         String consulta = "SELECT * FROM departamento";
 
-        try (Connection conexion = getConnection();
-             PreparedStatement ps = conexion.prepareStatement(consulta);
+        try (PreparedStatement ps = getConnection().prepareStatement(consulta);
              ResultSet resultadoQuery = ps.executeQuery()) {
 
             while (resultadoQuery.next()) {
@@ -188,8 +193,7 @@ public class Componente implements IDAO {
         Department departamento = null;
         String consulta = "SELECT * FROM departamento WHERE depno = ?";
 
-        try (Connection conexion = getConnection();
-             PreparedStatement ps = conexion.prepareStatement(consulta)) {
+        try (PreparedStatement ps = getConnection().prepareStatement(consulta)) {
 
             ps.setInt(1, (Integer) id);
             try (ResultSet resultadoQuery = ps.executeQuery()) {
@@ -210,8 +214,7 @@ public class Componente implements IDAO {
     public boolean addDepartment(Department department) {
         String consulta = "INSERT INTO departamento (depno, nombre, ubicacion) VALUES (?, ?, ?)";
 
-        try (Connection conexion = getConnection();
-             PreparedStatement ps = conexion.prepareStatement(consulta)) {
+        try (PreparedStatement ps = getConnection().prepareStatement(consulta)) {
 
             ps.setInt(1, department.getDepno());
             ps.setString(2, department.getNombre());
@@ -246,8 +249,7 @@ public class Componente implements IDAO {
 
         String consulta = "UPDATE departamento SET nombre = ?, ubicacion = ? WHERE depno = ?";
 
-        try (Connection conexion = getConnection();
-             PreparedStatement ps = conexion.prepareStatement(consulta)) {
+        try (PreparedStatement ps = getConnection().prepareStatement(consulta)) {
 
             ps.setString(1, nombre);
             ps.setString(2, ubicacion);
@@ -266,8 +268,7 @@ public class Componente implements IDAO {
     public boolean deleteDepartment(Object id) {
         String consulta = "DELETE FROM departamento WHERE depno = ?";
 
-        try (Connection conexion = getConnection();
-             PreparedStatement ps = conexion.prepareStatement(consulta)) {
+        try (PreparedStatement ps = getConnection().prepareStatement(consulta)) {
 
             ps.setInt(1, (Integer) id);
             int filas = ps.executeUpdate();
@@ -284,8 +285,7 @@ public class Componente implements IDAO {
         List<Employee> lista = new ArrayList<>();
         String consulta = "SELECT * FROM empleado WHERE depno = ?";
 
-        try (Connection conexion = getConnection();
-             PreparedStatement ps = conexion.prepareStatement(consulta)) {
+        try (PreparedStatement ps = getConnection().prepareStatement(consulta)) {
 
             ps.setInt(1, (Integer) idDept);
 
