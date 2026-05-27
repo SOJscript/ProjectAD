@@ -1,5 +1,11 @@
 package projectAD.fichero;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import projectAD.IDAO;
@@ -7,19 +13,79 @@ import projectAD.model.Department;
 import projectAD.model.Employee;
 
 public class Componente implements IDAO {
+
+    // Ruta del fichero
+    private static final String RUTA = "src/main/java/projectAD/empresa.txt";
+
+    private List<Department> departamentos = new ArrayList<>();
+    private List<Employee> empleados = new ArrayList<>();
+
+    public Componente() {
+        cargarFichero();
+    }
+
+    // Lee el fichero y carga los datos en las listas
+    private void cargarFichero() {
+        try (BufferedReader br = new BufferedReader(new FileReader(RUTA))) {
+            String linea;
+            while ((linea = br.readLine()) != null) {
+                if (linea.startsWith("--") || linea.isBlank()) continue;
+
+                String contenido = linea.substring(linea.indexOf('(') + 1, linea.indexOf(')'));
+                String[] partes = contenido.split(",");
+
+                if (linea.startsWith("department(")) {
+                    Department d = new Department(Integer.parseInt(partes[0]), partes[1], partes[2]);
+                    departamentos.add(d);
+
+                } else if (linea.startsWith("employee(")) {
+                    int depno = Integer.parseInt(partes[3]);
+                    Department dept = findDepartmentById(depno);
+                    Employee e = new Employee(Integer.parseInt(partes[0]), partes[1], partes[2], dept);
+                    empleados.add(e);
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Error al leer el fichero: " + e.getMessage());
+        }
+    }
+
+    // Reescribe el fichero
+    private void guardarFichero() {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(RUTA))) {
+            for (Department d : departamentos) {
+                bw.write("department(" + d.getDepno() + "," + d.getNombre() + "," + d.getUbicacion() + ")");
+                bw.newLine();
+            }
+            for (Employee e : empleados) {
+                int depno = e.getDepartamento().getDepno();
+                bw.write("employee(" + e.getEmpno() + "," + e.getNombre() + "," + e.getPuesto() + "," + depno + ")");
+                bw.newLine();
+            }
+        } catch (IOException e) {
+            System.out.println("Error al escribir el fichero: " + e.getMessage());
+        }
+    }
+
     @Override
     public List<Employee> findAllEmployees() {
-        return List.of();
+        return empleados;
     }
 
     @Override
     public Employee findEmployeeById(Object id) {
+        int idEmp = (Integer) id;
+        for (Employee e : empleados) {
+            if (e.getEmpno() == idEmp) return e;
+        }
         return null;
     }
 
     @Override
     public boolean addEmployee(Employee employee) {
-        return false;
+        empleados.add(employee);
+        guardarFichero();
+        return true;
     }
 
     @Override
@@ -29,22 +95,32 @@ public class Componente implements IDAO {
 
     @Override
     public boolean deleteEmployee(Object id) {
-        return false;
+        Employee e = findEmployeeById(id);
+        if (e == null) return false;
+        empleados.remove(e);
+        guardarFichero();
+        return true;
     }
 
     @Override
     public List<Department> findAllDepartments() {
-        return List.of();
+        return departamentos;
     }
 
     @Override
     public Department findDepartmentById(Object id) {
+        int idDep = (Integer) id;
+        for (Department d : departamentos) {
+            if (d.getDepno() == idDep) return d;
+        }
         return null;
     }
 
     @Override
     public boolean addDepartment(Department department) {
-        return false;
+        departamentos.add(department);
+        guardarFichero();
+        return true;
     }
 
     @Override
@@ -54,11 +130,22 @@ public class Componente implements IDAO {
 
     @Override
     public boolean deleteDepartment(Object id) {
-        return false;
+        Department d = findDepartmentById(id);
+        if (d == null) return false;
+        departamentos.remove(d);
+        guardarFichero();
+        return true;
     }
 
     @Override
     public List<Employee> findEmployeesByDept(Object idDept) {
-        return List.of();
+        int dep = (Integer) idDept;
+        List<Employee> lista = new ArrayList<>();
+        for (Employee e : empleados) {
+            if (e.getDepartamento().getDepno() == dep) {
+                lista.add(e);
+            }
+        }
+        return lista;
     }
 }

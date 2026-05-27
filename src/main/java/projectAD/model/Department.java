@@ -1,6 +1,13 @@
 package projectAD.model;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+@Entity                       // Esta clase es una entidad (se mapea a una tabla)
+@Table(name = "departamento") // Nombre de la tabla en la base de datos
 public class Department {
+    @Id                       // Clave primaria
     private int depno;
     private String nombre;
     private String ubicacion;

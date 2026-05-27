@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns="https://jakarta.ee/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence
+                                 https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd"
+             version="3.0">
+
+    <!-- Unidad de persistencia: la usa el Componente para crear el EntityManager -->
+    <persistence-unit name="empresaDepartamento" transaction-type="RESOURCE_LOCAL">
+
+        <!-- Clases que Hibernate debe gestionar -->
+        <class>projectAD.model.Department</class>
+        <class>projectAD.model.Employee</class>
+
+        <properties>
+            <!-- Datos de conexión a PostgreSQL -->
+            <property name="jakarta.persistence.jdbc.driver" value="org.postgresql.Driver"/>
+            <property name="jakarta.persistence.jdbc.url" value="jdbc:postgresql://10.116.2.223:5432/postgres"/>
+            <property name="jakarta.persistence.jdbc.user" value="postgres"/>
+            <property name="jakarta.persistence.jdbc.password" value="1234"/>
+
+            <!-- Dialecto de la base de datos -->
+            <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect"/>
+
+            <!-- No tocar el esquema: las tablas ya existen -->
+            <property name="hibernate.hbm2ddl.auto" value="none"/>
+        </properties>
+
+    </persistence-unit>
+</persistence>
