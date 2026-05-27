@@ -26,6 +26,13 @@
             <artifactId>postgresql</artifactId>
             <version>42.7.3</version>
         </dependency>
+
+        <!-- Hibernate (ORM con JPA). Incluye la API de JPA (jakarta.persistence). -->
+        <dependency>
+            <groupId>org.hibernate.orm</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>6.4.4.Final</version>
+        </dependency>
     </dependencies>
 
 </project>
