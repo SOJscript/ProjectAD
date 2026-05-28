@@ -1,0 +1,51 @@
+package projectAD.model;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "empleado")
+public class Employee {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // empno es serial: lo genera la BD
+    private int empno;
+    private String nombre;
+    private String puesto;
+
+    @ManyToOne                      // Muchos empleados pertenecen a un departamento
+    @JoinColumn(name = "depno")     // Columna de empleado que guarda la FK al departamento
+    private Department departamento;
+
+    public Employee() {
+    }
+
+    public Employee(int empno, String nombre, String puesto, Department departamento) {
+        this.empno = empno;
+        this.nombre = nombre;
+        this.puesto = puesto;
+        this.departamento = departamento;
+    }
+
+    // Getters y Setters
+    public int getEmpno() { return empno; }
+    public void setEmpno(int empno) { this.empno = empno; }
+
+    public String getNombre() { return nombre; }
+    public void setNombre(String nombre) { this.nombre = nombre; }
+
+    public String getPuesto() { return puesto; }
+    public void setPuesto(String puesto) { this.puesto = puesto; }
+
+    public Department getDepartamento() { return departamento; }
+    public void setDepartamento(Department departamento) { this.departamento = departamento; }
+
+    @Override
+    public String toString() {
+        return "Employee{" + "empno=" + empno + ", nombre='" + nombre + '\'' + ", puesto='" + puesto + '\'' + ", departamento=" + (departamento != null ? departamento.getNombre() : "Ninguno") + '}';
+    }
+}
