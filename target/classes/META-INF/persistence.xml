@@ -17,15 +17,12 @@
             <property name="jakarta.persistence.jdbc.driver" value="org.postgresql.Driver"/>
 
             <!-- Conexion Marti -->
-            <!-- <property name="jakarta.persistence.jdbc.url" value="jdbc:postgresql://10.116.2.223:5432/postgres"/>-->
+            <property name="jakarta.persistence.jdbc.url" value="jdbc:postgresql://10.116.2.223:5432/postgres"/>
             <!-- Conexion Sergi -->
-            <property name="jakarta.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/postgres"/>
+            <!-- <property name="jakarta.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/postgres"/> -->
 
             <property name="jakarta.persistence.jdbc.user" value="postgres"/>
             <property name="jakarta.persistence.jdbc.password" value="1234"/>
-
-            <!-- Dialecto de la base de datos -->
-            <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect"/>
 
             <!-- No tocar el esquema: las tablas ya existen -->
             <property name="hibernate.hbm2ddl.auto" value="none"/>

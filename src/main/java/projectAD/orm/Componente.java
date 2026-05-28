@@ -1,6 +1,7 @@
 package projectAD.orm;
 
 import java.util.List;
+import java.util.Scanner;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
@@ -49,7 +50,41 @@ public class Componente implements IDAO {
 
     @Override
     public boolean updateEmployee(Object id) {
-        return false; 
+        Scanner sc = new Scanner(System.in);
+
+        EntityManager em = emf.createEntityManager();
+        Employee existente = em.find(Employee.class, (Integer) id);
+        if (existente == null) {
+            System.out.println("No existe ningún empleado con ese ID.");
+            em.close();
+            return false;
+        }
+
+        System.out.println("Empleado actual: " + existente.getNombre() + " (" + existente.getPuesto() + ")");
+
+        System.out.print("Nuevo nombre: ");
+        String nombre = sc.nextLine();
+
+        System.out.print("Nuevo puesto: ");
+        String puesto = sc.nextLine();
+
+        System.out.print("Nuevo ID de departamento (0 si ninguno): ");
+        int depno = Integer.parseInt(sc.nextLine());
+
+        em.getTransaction().begin();
+        existente.setNombre(nombre);
+        existente.setPuesto(puesto);
+
+        if (depno != 0) {
+            Department dep = em.find(Department.class, depno);
+            existente.setDepartamento(dep);
+        } else {
+            existente.setDepartamento(null);
+        }
+
+        em.getTransaction().commit();
+        em.close();
+        return true;
     }
 
     @Override
@@ -96,7 +131,30 @@ public class Componente implements IDAO {
 
     @Override
     public boolean updateDepartment(Object id) {
-        return false;
+        Scanner sc = new Scanner(System.in);
+
+        EntityManager em = emf.createEntityManager();
+        Department existente = em.find(Department.class, (Integer) id);
+        if (existente == null) {
+            System.out.println("No existe ningún departamento con ese ID.");
+            em.close();
+            return false;
+        }
+
+        System.out.println("Departamento actual: " + existente.getNombre() + " | " + existente.getUbicacion());
+
+        System.out.print("Nuevo nombre: ");
+        String nombre = sc.nextLine();
+
+        System.out.print("Nueva ubicación: ");
+        String ubicacion = sc.nextLine();
+
+        em.getTransaction().begin();
+        existente.setNombre(nombre);
+        existente.setUbicacion(ubicacion);
+        em.getTransaction().commit();
+        em.close();
+        return true;
     }
 
     @Override

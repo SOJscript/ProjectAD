@@ -7,6 +7,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 import projectAD.IDAO;
 import projectAD.model.Department;
@@ -90,7 +91,37 @@ public class Componente implements IDAO {
 
     @Override
     public boolean updateEmployee(Object id) {
-        return false;
+        Scanner sc = new Scanner(System.in);
+
+        Employee existente = findEmployeeById(id);
+        if (existente == null) {
+            System.out.println("No existe ningún empleado con ese ID.");
+            return false;
+        }
+
+        System.out.println("Empleado actual: " + existente.getNombre() + " (" + existente.getPuesto() + ")");
+
+        System.out.print("Nuevo nombre: ");
+        String nombre = sc.nextLine();
+
+        System.out.print("Nuevo puesto: ");
+        String puesto = sc.nextLine();
+
+        System.out.print("Nuevo ID de departamento: ");
+        int depno = Integer.parseInt(sc.nextLine());
+
+        Department dep = findDepartmentById(depno);
+        if (dep == null) {
+            System.out.println("No existe ningún departamento con ese ID.");
+            return false;
+        }
+
+        existente.setNombre(nombre);
+        existente.setPuesto(puesto);
+        existente.setDepartamento(dep);
+
+        guardarFichero();
+        return true;
     }
 
     @Override
@@ -125,7 +156,27 @@ public class Componente implements IDAO {
 
     @Override
     public boolean updateDepartment(Object id) {
-        return false;
+        Scanner sc = new Scanner(System.in);
+
+        Department existente = findDepartmentById(id);
+        if (existente == null) {
+            System.out.println("No existe ningún departamento con ese ID.");
+            return false;
+        }
+
+        System.out.println("Departamento actual: " + existente.getNombre() + " | " + existente.getUbicacion());
+
+        System.out.print("Nuevo nombre: ");
+        String nombre = sc.nextLine();
+
+        System.out.print("Nueva ubicación: ");
+        String ubicacion = sc.nextLine();
+
+        existente.setNombre(nombre);
+        existente.setUbicacion(ubicacion);
+
+        guardarFichero();
+        return true;
     }
 
     @Override
