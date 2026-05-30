@@ -1,134 +1,67 @@
-# db4o en el proyecto
+# Componente db4o — Guía de lectura
 
-Guía del componente de persistencia basado en **db4o**, una de las implementaciones intercambiables de la interfaz `IDAO` (junto a Postgres, Mongo y ORM).
+Implementación de `IDAO` sobre **db4o**, una base de datos de objetos embebida. Persiste directamente las instancias de `Employee` y `Department` en un único fichero binario (`empresa.db`), sin SQL ni mapeo objeto-relacional.
 
-## 1. Qué es db4o
+## Cómo está organizado el archivo
 
-db4o (*database for objects*) es una base de datos **orientada a objetos** y **embebida**, escrita en Java. A diferencia de una base relacional como PostgreSQL, db4o guarda los objetos Java directamente (`Employee`, `Department`), sin mapeo objeto-relacional ni SQL: le pides "guarda este objeto" o "tráeme los que cumplan esta condición", y trabaja con tus clases tal cual.
+El `Componente.java` se lee de arriba abajo en este orden:
 
-Es embebida, es decir, no necesita servidor, usuario ni contraseña: toda la base de datos vive en un único fichero local que se crea solo. Esto la hace muy cómoda para proyectos pequeños o para entender el paradigma orientado a objetos, que es justo el objetivo aquí: demostrar que una misma interfaz `IDAO` puede implementarse sobre motores radicalmente distintos (relacional, documental y de objetos) sin cambiar el resto de la aplicación.
+1. Constructor: abre la base de datos y configura índices.
+2. Helpers privados `guardar` y `borrar`.
+3. CRUD de `Employee`.
+4. CRUD de `Department`.
+5. Consulta relacional `findEmployeesByDept`.
 
-## 2. Instalación de la librería (JAR)
-
-db4o está descontinuado y **no está disponible de forma fiable en el repositorio central de Maven**, así que no se añade por `pom.xml`: hay que incluir el JAR manualmente. Se usa el archivo "all-java5", que es autocontenido (trae todo db4o en un solo fichero). El sufijo *java5* solo indica que está compilado para Java 5 en adelante; funciona sin problema en cualquier Java moderno.
-
-Pasos en IntelliJ:
-
-1. Copia el JAR dentro del proyecto (por ejemplo en una carpeta `lib/`), para que la dependencia viaje con el proyecto y no dependa de una ruta externa.
-2. `File → Project Structure → Libraries → + → Java`, selecciona el JAR y aplícalo al módulo.
-3. Comprueba que los `import com.db4o.*;` del componente ya no aparecen marcados como error.
-
-En Eclipse el equivalente es: clic derecho sobre el proyecto → `Build Path → Configure Build Path → Libraries → Add External JARs`.
-
-Importante: el código **no referencia la ruta del JAR** en ningún sitio. La conexión entre el código y la librería son únicamente los `import com.db4o.*` más la llamada a `Db4oEmbedded.openFile(...)`. Lo único que hace falta es que el JAR esté en el *classpath*.
-
-## 3. El fichero de la base de datos
+## Apertura de la base de datos
 
 ```java
-private static final String DB_FILE = "empresa.db";
+EmbeddedConfiguration config = Db4oEmbedded.newConfiguration();
+config.common().objectClass(Employee.class).objectField("empno").indexed(true);
+config.common().objectClass(Department.class).objectField("depno").indexed(true);
+db = Db4oEmbedded.openFile(config, DB_FILE);
 ```
 
-db4o guarda todos los objetos en un único fichero binario, creado automáticamente en el directorio de trabajo del proyecto la primera vez que se abre. Para "empezar de cero" basta con borrar ese fichero: se recreará vacío en el siguiente arranque.
+El `ObjectContainer` es la conexión: se abre **una sola vez en el constructor** y se reutiliza durante toda la vida del componente. Esto permite que db4o rastree los objetos recuperados, de forma que al modificarlos y volver a guardarlos se actualicen en lugar de duplicarse.
 
-Nota: db4o bloquea el fichero para un solo proceso a la vez. Si dejas otra ejecución abierta apuntando al mismo fichero (por ejemplo el `Main` y a la vez `poblarBdDb4o`), la segunda dará error de fichero bloqueado.
+Los **índices** sobre `empno` y `depno` aceleran las búsquedas por identificador y se configuran antes de `openFile`.
 
-## 4. Apertura de la conexión y los índices
+## Helpers de escritura
 
 ```java
-private final ObjectContainer db;
-
-public Componente() {
-    EmbeddedConfiguration config = Db4oEmbedded.newConfiguration();
-    config.common().objectClass(Employee.class).objectField("empno").indexed(true);
-    config.common().objectClass(Department.class).objectField("depno").indexed(true);
-    db = Db4oEmbedded.openFile(config, DB_FILE);
-}
+guardar(obj) → db.store(obj) + db.commit()
+borrar(obj)  → db.delete(obj) + db.commit()
 ```
 
-El `ObjectContainer` es **el núcleo de la conexión**: representa la base de datos abierta y a través de él se hacen todas las operaciones (guardar, consultar, borrar). Se abre una sola vez en el **constructor** y se reutiliza durante toda la vida del componente.
+Centralizan las dos operaciones de escritura para que cada método CRUD acabe en una sola línea de retorno.
 
-¿Por qué en el constructor y no en un método `abrirConexion()` aparte? Porque `Main` se limita a hacer `new projectAD.db4o.Componente()` y no llamaría a ningún método de apertura. Poniéndolo en el constructor, la conexión queda lista en el momento en que se elige la opción de db4o en el menú.
+## Patrón de consulta
 
-Mantener un único contenedor abierto tiene además una ventaja clave: los objetos recuperados quedan **rastreados** por db4o, de modo que al modificarlos y volver a guardarlos se actualizan en lugar de duplicarse (ver sección 6).
-
-Los **índices** sobre `empno` y `depno` aceleran las búsquedas por esos campos (`findEmployeeById`, `findDepartmentById`). Se definen en la configuración **antes** de abrir el fichero. Si el fichero ya existía sin índices, hay que borrarlo y volver a poblar para que los índices tengan efecto.
-
-## 5. Consultas con Predicate
-
-Las consultas usan **Native Queries** con `Predicate`, una clase abstracta de db4o en la que defines la condición de búsqueda en Java puro:
+Todas las consultas usan **Native Queries con `Predicate`**:
 
 ```java
 db.query(new Predicate<Employee>() {
-    @Override
-    public boolean match(Employee emp) {
-        return emp.getEmpno() == empno;
-    }
+    @Override public boolean match(Employee emp) { return emp.getEmpno() == empno; }
 });
 ```
 
-El método `match()` se ejecuta para cada objeto de ese tipo en la base; devuelve `true` si debe incluirse en el resultado. Como `Predicate` es una clase abstracta (no una interfaz funcional), **no se puede usar una lambda**: hay que usar una clase anónima, y las variables capturadas dentro del `match` deben ser finales o efectivamente finales (por eso el id se copia a una variable local antes).
+Se eligió `Predicate` en lugar de *Query By Example* porque QBE ignora los campos con valor por defecto, y el valor por defecto de un `int` es `0`: una búsqueda por id `0` devolvería todos los registros. Con `Predicate` la condición es explícita.
 
-Se eligió `Predicate` en lugar de *Query By Example* (QBE) porque QBE ignora los campos con valor por defecto, y para un `int` el valor por defecto es `0`. Con QBE, buscar por id `0` devolvería *todos* los registros en vez de ninguno. Con `Predicate` se controla la condición exacta y se evita ese comportamiento inesperado.
+Como db4o no tiene un método "buscar único", las búsquedas por id devuelven una lista de la que se extrae el primer elemento con `result.isEmpty() ? null : result.get(0)`.
 
-### El patrón `result.isEmpty() ? null : result.get(0)`
+## Suplencia de restricciones relacionales
 
-Las consultas en db4o siempre devuelven una **lista**, porque la API no tiene un método "buscar único". En una búsqueda por id (que es único) la lista tendrá 0 o 1 elemento, así que este patrón la convierte en un solo objeto o en `null`:
+db4o no tiene claves primarias, foráneas ni borrados en cascada, así que el componente las **simula manualmente**:
 
-```java
-List<Employee> result = db.query(...);
-return result.isEmpty() ? null : result.get(0);
-```
+**Unicidad:** `addEmployee` y `addDepartment` comprueban con `findById` que no exista ya un objeto con el mismo identificador antes de guardarlo.
 
-## 6. Guardar, actualizar y borrar
+**Referencias correctas:** al añadir o modificar un empleado se busca su departamento con `findDepartmentById` y se le asigna esa instancia (la que está en la base), no la recibida. De lo contrario db4o duplicaría el departamento.
 
-Las operaciones de escritura se centralizan en dos *helpers* para no repetir `store`/`commit`/`delete` en cada método:
+**Integridad referencial al borrar:** `deleteDepartment` invoca `findEmployeesByDept` antes de borrar; si hay empleados asignados, rechaza el borrado para evitar referencias colgantes y posibles `NullPointerException`.
 
-```java
-private boolean guardar(Object obj) { db.store(obj); db.commit(); return true; }
-private boolean borrar(Object obj)  { if (obj == null) return false; db.delete(obj); db.commit(); return true; }
-```
+## Actualización
 
-**Guardar (alta):** `db.store(obj)` seguido de `db.commit()` para confirmar la transacción.
+`updateEmployee` y `updateDepartment` recuperan el objeto con `findById`, leen los nuevos valores por consola, modifican sus atributos con los *setters* y llaman a `guardar` sobre **ese mismo objeto**. Como está rastreado por el contenedor, db4o lo actualiza in-situ.
 
-**Actualizar:** se recupera el objeto con `findEmployeeById`/`findDepartmentById`, se modifican sus atributos con los *setters* y se vuelve a llamar a `guardar(obj)` sobre **el mismo objeto**. Como ese objeto viene del contenedor (está rastreado), db4o reconoce que ya existe y lo actualiza en lugar de insertar uno nuevo.
+## Persistencia y ejecución
 
-**Borrar:** `db.delete(obj)` + `db.commit()`.
-
-En las altas, el componente comprueba además que no exista ya un objeto con ese id (`addEmployee` y `addDepartment` rechazan duplicados), algo que en Postgres haría la clave primaria pero que aquí hay que verificar a mano.
-
-## 7. Integridad referencial manual
-
-Esta es una de las diferencias importantes respecto a una base relacional. En PostgreSQL, la clave externa `fk_employee_dpt` impide borrar un departamento que tenga empleados asignados. **En db4o no hay restricciones automáticas**, así que esa comprobación se implementa a mano en `deleteDepartment`:
-
-```java
-List<Employee> empleados = findEmployeesByDept(id);
-if (!empleados.isEmpty()) {
-    System.out.println("No se puede borrar el departamento porque tiene empleados asignados.");
-    return false;
-}
-```
-
-Sin esta comprobación, al borrar un departamento los empleados que lo referenciaban quedarían apuntando a un objeto ya eliminado, provocando un `NullPointerException` al hacer, por ejemplo, `empleado.getDepartamento().getNombre()`.
-
-Por el mismo motivo, en las altas y modificaciones de empleados se reutiliza la instancia del departamento que ya está en la base (buscándola con `findDepartmentById`) en lugar de crear una nueva, para no acabar con departamentos duplicados.
-
-## 8. Cómo usarlo
-
-1. Ejecuta `Main` y elige la opción de db4o en el menú de modelos de datos. La primera vez se crea el fichero de base de datos automáticamente.
-2. Da de alta **primero los departamentos** y luego los empleados, porque al añadir un empleado se le pide el id de su departamento y este debe existir ya.
-3. Recorre el resto del menú (listar, buscar por id, ver empleados de un departamento, modificar, borrar) para validar las operaciones.
-
-Como cada alta, modificación y borrado hace `commit()`, los datos persisten entre ejecuciones: al volver a abrir el programa y elegir db4o, los empleados y departamentos siguen ahí.
-
-## 9. Resumen
-
-| Acción | Código |
-|---|---|
-| Abrir BD con índices | `Db4oEmbedded.openFile(config, "empresa.db")` |
-| Consulta por condición | `db.query(new Predicate<T>() { ... })` |
-| Extraer único resultado | `lista.isEmpty() ? null : lista.get(0)` |
-| Añadir / actualizar | `guardar(obj)` → `store` + `commit` |
-| Borrar | `borrar(obj)` → `delete` + `commit` |
-| Evitar referencias colgantes | comprobar empleados antes de borrar un departamento |
-
-db4o es una tecnología antigua pero muy útil para entender el paradigma de bases de datos orientadas a objetos, y demuestra cómo un mismo `IDAO` puede implementarse sobre motores muy diferentes (relacional, documental, objeto-embebido) manteniendo idéntica la interfaz.
+Cada operación de escritura confirma la transacción con `commit()`, por lo que los datos persisten entre ejecuciones en `empresa.db`. Para reiniciar la base basta con borrar ese fichero. db4o bloquea el fichero a un único proceso, por lo que `Main` y `poblarBdDb4o` no pueden ejecutarse simultáneamente sobre el mismo `empresa.db`.
